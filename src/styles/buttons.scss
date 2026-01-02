@@ -1,0 +1,22 @@
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &--primary {
+    background: $primary;
+    color: white;
+  }
+
+  &--secondary {
+    background: $secondary;
+    color: white;
+  }
+
+  &--danger {
+    background: $danger;
+    color: white;
+  }
+}

@@ -1,0 +1,203 @@
+/* ============================= */
+/* Menu – Dostoros Style */
+/* ============================= */
+
+.menu {
+  padding: 16px;
+  padding-bottom: 120px;
+}
+
+.menu__title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.menu__loading {
+  padding: 16px 0;
+}
+
+/* ===== Grid ===== */
+.menu__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+/* ===== Card ===== */
+.menu__card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== Left content ===== */
+.menu__content {
+  flex: 1;
+  padding-right: 12px;
+}
+
+.menu__name {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.menu__description {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.menu__price {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ===== Image + Floating Add ===== */
+.menu__imageWrapper {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menu__image {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+/* ===== Floating ADD ===== */
+.menu__add {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ffffff;
+  color: #1dbf73;
+  border: 1px solid #1dbf73;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+/* ===== Counter ===== */
+.menu__counter {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  background: #ffffff;
+  border: 1px solid #1dbf73;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.menu__counter button {
+  background: transparent;
+  border: none;
+  padding: 5px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu__counter span {
+  padding: 5px 10px;
+  font-weight: 700;
+}
+
+/* ===== Sticky Cart Bar ===== */
+.menu__cartBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.menu__cartInfo {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.menu__cartBtn {
+  background: #1dbf73;
+  color: #ffffff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+/* ============================= */
+/* Mobile Responsive */
+/* ============================= */
+
+@media (max-width: 768px) {
+  /* 1 item per row */
+  .menu__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu__card {
+    padding: 12px;
+  }
+
+  .menu__content {
+    padding-right: 10px;
+  }
+
+  .menu__name {
+    font-size: 16px;
+  }
+
+  .menu__description {
+    font-size: 13px;
+  }
+
+  .menu__price {
+    font-size: 14px;
+  }
+
+  /* Slightly smaller image on mobile */
+  .menu__imageWrapper {
+    width: 90px;
+    height: 90px;
+  }
+
+  /* Floating ADD spacing tweak */
+  .menu__add,
+  .menu__counter {
+    bottom: -8px;
+  }
+
+  /* Cart bar spacing */
+  .menu__cartBar {
+    padding: 12px 14px;
+  }
+
+  .menu__cartBtn {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+}
