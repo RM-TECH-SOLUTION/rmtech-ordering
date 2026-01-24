@@ -23,8 +23,8 @@ import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
 import ShippingPolicy from "./pages/ShippingPolicy";
 import ContactUs from "./pages/ContactUs";
-import LaunchCounter from "./components/LaunchCounter";
-import React, {  useState } from "react";
+// import LaunchCounter from "./components/LaunchCounter";
+// import React, {  useState } from "react";
 
 
 // Import icons (you can use react-icons or SVG)
@@ -376,11 +376,11 @@ function Menu() {
 }
 
 function App() {
-   const [showLaunch, setShowLaunch] = useState(true);
+  //  const [showLaunch, setShowLaunch] = useState(true);
 
-  if (showLaunch) {
-    return <LaunchCounter onFinish={() => setShowLaunch(false)} />;
-  }
+  // if (showLaunch) {
+  //   return <LaunchCounter onFinish={() => setShowLaunch(false)} />;
+  // }
   
   return (
     <>
