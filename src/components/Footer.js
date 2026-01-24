@@ -43,17 +43,18 @@ export default function Footer() {
             <div className="links-column">
               <h3 className="links-title">Quick Links</h3>
               <ul className="links-list">
-                <li><Link to="/">Home</Link></li>
-                <li><Link to="/categories">Categories</Link></li>
+            <li><Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Home</Link></li>
+            <li><Link to="/categories" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Categories</Link></li>
               </ul>
             </div>
             
             <div className="links-column">
               <h3 className="links-title">Legal</h3>
               <ul className="links-list">
-                <li><Link to="/privacy-policy">Privacy Policy</Link></li>
-                <li><Link to="/terms">Terms of Service</Link></li>
-                <li><Link to="/refund-policy">Refund Policy</Link></li>
+                <li><Link to="/privacy-policy" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Privacy Policy</Link></li>
+                <li><Link to="/terms" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Terms and Conditions</Link></li>
+                <li><Link to="/refund-policy" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Cancellations and Refunds</Link></li>
+                <li><Link to="/contact" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Contact Us</Link></li>
               </ul>
             </div>
           </div>

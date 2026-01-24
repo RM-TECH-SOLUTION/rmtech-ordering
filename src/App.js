@@ -21,6 +21,8 @@ import "./styles/pages/Menu.scss";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import RefundPolicy from "./pages/RefundPolicy";
+import ShippingPolicy from "./pages/ShippingPolicy";
+import ContactUs from "./pages/ContactUs";
 
 
 // Import icons (you can use react-icons or SVG)
@@ -450,6 +452,8 @@ function App() {
          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/shipping" element={<ShippingPolicy />} />
+        <Route path="/contact" element={<ContactUs />} />
       </Routes>
 
       <Footer />

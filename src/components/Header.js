@@ -59,12 +59,10 @@ function Header() {
 
   const navLinks = [
     { path: "/", label: "Home", icon: "🏠" },
-    { path: "/categories", label: "Categories", icon: "📁" },
-    { path: "/orders", label: "Order History", icon: "📋" },
-    { path: "/profile", label: "Profile", icon: "👤" },
-    { path: "/privacy-policy", label: "Privacy", icon: "🔒" },
-    { path: "/terms", label: "Terms", icon: "📄" },
-    { path: "/refund-policy", label: "Refund", icon: "↩️" },
+    { path: "/privacy-policy", label: "Privacy Policy", icon: "🔒" },
+    { path: "/terms", label: "Terms and Conditions", icon: "📄" },
+    { path: "/refund-policy", label: "Cancellations and Refunds", icon: "↩️" },
+    { path: "/contact", label: "Contact Us", icon: "↩️" },
   ];
 
   return (
