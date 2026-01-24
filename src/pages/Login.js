@@ -135,22 +135,6 @@ function Login() {
           </button>
         </form>
 
-        {/* Footer */}
-        <div className="login-footer">
-          <p>
-            By signing in, you agree to our{" "}
-            <a href="/terms" target="_blank" rel="noopener noreferrer">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" target="_blank" rel="noopener noreferrer">
-              Privacy Policy
-            </a>
-          </p>
-          <div className="demo-note">
-            💡 Demo: Enter any 10-digit number to login
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -18,6 +18,9 @@ import { getCatalogueItems } from "./redux/catalogueItems/catalogueItems.reducer
 import { addToCart, removeFromCart } from "./redux/cart/cart.reducer";
 import "./styles/pages/Categories.scss";
 import "./styles/pages/Menu.scss";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import RefundPolicy from "./pages/RefundPolicy";
 
 
 // Import icons (you can use react-icons or SVG)
@@ -444,6 +447,9 @@ function App() {
           }
         />
         <Route path="/order-success" element={<OrderSuccess />} />
+         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
       </Routes>
 
       <Footer />

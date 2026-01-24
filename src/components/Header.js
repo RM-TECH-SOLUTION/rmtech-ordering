@@ -61,8 +61,10 @@ function Header() {
     { path: "/", label: "Home", icon: "🏠" },
     { path: "/categories", label: "Categories", icon: "📁" },
     { path: "/orders", label: "Order History", icon: "📋" },
-    { path: "/address", label: "Address", icon: "📍" },
     { path: "/profile", label: "Profile", icon: "👤" },
+    { path: "/privacy-policy", label: "Privacy", icon: "🔒" },
+    { path: "/terms", label: "Terms", icon: "📄" },
+    { path: "/refund-policy", label: "Refund", icon: "↩️" },
   ];
 
   return (

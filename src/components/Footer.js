@@ -45,9 +45,6 @@ export default function Footer() {
               <ul className="links-list">
                 <li><Link to="/">Home</Link></li>
                 <li><Link to="/categories">Categories</Link></li>
-                <li><Link to="/menu">Menu</Link></li>
-                <li><Link to="/about">About Us</Link></li>
-                <li><Link to="/contact">Contact</Link></li>
               </ul>
             </div>
             
@@ -57,19 +54,6 @@ export default function Footer() {
                 <li><Link to="/privacy-policy">Privacy Policy</Link></li>
                 <li><Link to="/terms">Terms of Service</Link></li>
                 <li><Link to="/refund-policy">Refund Policy</Link></li>
-                <li><Link to="/cookies">Cookie Policy</Link></li>
-                <li><Link to="/safety">Safety Standards</Link></li>
-              </ul>
-            </div>
-            
-            <div className="links-column">
-              <h3 className="links-title">Support</h3>
-              <ul className="links-list">
-                <li><Link to="/help">Help Center</Link></li>
-                <li><Link to="/faq">FAQ</Link></li>
-                <li><Link to="/community">Community</Link></li>
-                <li><Link to="/partner">Partner with Us</Link></li>
-                <li><Link to="/careers">Careers</Link></li>
               </ul>
             </div>
           </div>
@@ -82,23 +66,23 @@ export default function Footer() {
                 <FaPhone className="contact-icon" />
                 <div className="contact-text">
                   <span className="contact-label">Call Us</span>
-                  <span className="contact-value">+1 (555) 123-4567</span>
+                  <span className="contact-value">+91 8777370341 / 7013608102</span>
                 </div>
               </div>
               <div className="contact-item">
                 <FaEnvelope className="contact-icon" />
                 <div className="contact-text">
                   <span className="contact-label">Email Us</span>
-                  <span className="contact-value">support@foodexpress.com</span>
+                  <span className="contact-value">contact@foodexpress@gmail.com</span>
                 </div>
               </div>
-              <div className="contact-item">
+              {/* <div className="contact-item">
                 <FaMapMarkerAlt className="contact-icon" />
                 <div className="contact-text">
                   <span className="contact-label">Visit Us</span>
                   <span className="contact-value">123 Food Street, New York</span>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -112,7 +96,7 @@ export default function Footer() {
             <p>© {currentYear} FoodExpress. All rights reserved. Crafted with ❤️ by RM Tech Solutions</p>
           </div>
           
-          <div className="footer__social">
+          {/* <div className="footer__social">
             <div className="social-icons">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon">
                 <FaFacebook />
@@ -138,7 +122,7 @@ export default function Footer() {
               <span className="payment-icon">🏦</span>
               <span className="payment-icon">📱</span>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Back to Top */}
