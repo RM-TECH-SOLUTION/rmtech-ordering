@@ -1,0 +1,50 @@
+.launch-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000 !important; /* FORCE BLACK */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+/* Center block */
+.launch-center {
+  text-align: center;
+  color: white;
+}
+
+/* Brand text */
+.launch-brand {
+  font-size: 22px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  opacity: 0.75;
+}
+
+/* Countdown number */
+.launch-number {
+  font-size: 160px;
+  font-weight: 900;
+  color: #ff007f;
+  text-shadow: 0 0 50px rgba(255, 0, 127, 0.85);
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
+
+/* Pulse animation */
+.launch-number.pop {
+  transform: scale(1.5);
+}
+
+/* Subtitle */
+.launch-subtitle {
+  margin-top: 16px;
+  font-size: 14px;
+  opacity: 0.5;
+  letter-spacing: 1px;
+}
