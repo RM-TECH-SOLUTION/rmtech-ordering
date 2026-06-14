@@ -5688,6 +5688,8 @@ function App() {
 
   const [merchantStatus, setMerchantStatus] = useState("active"); // "active", "inactive", "error"
 
+  const [merchantError, setMerchantError] = useState(null);
+
   const dispatch = useDispatch();
 
   const location = useLocation();
@@ -5713,7 +5715,19 @@ function App() {
 
 
 
-          if (merchantData && merchantData.merchantId) {
+          if (merchantData?.error) {
+
+            // API returned an error - store the error message
+
+            const errorMsg = merchantData.message || "Failed to load merchant";
+
+            console.error(`Merchant API Error: ${errorMsg}`);
+
+            setMerchantError(errorMsg);
+
+            setMerchantStatus("error");
+
+          } else if (merchantData && merchantData.merchantId) {
 
             // Check merchant status
 
@@ -5815,6 +5829,404 @@ function App() {
   //   return <LaunchCounter onFinish={() => setShowLaunch(false)} />;
 
   // }
+
+
+  // Show inactive UI if merchant is not active
+
+  if (!isLoadingMerchant && merchantStatus === "error") {
+
+    return (
+
+      <div
+
+        className="app-shell"
+
+        style={{
+
+          background: "linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #312e81 100%)",
+
+          minHeight: "100vh",
+
+          display: "flex",
+
+          alignItems: "center",
+
+          justifyContent: "center",
+
+          position: "relative",
+
+          overflow: "hidden"
+
+        }}
+
+      >
+
+        {/* Ambient particles */}
+
+        <div style={{
+
+          position: "absolute",
+
+          width: "2px",
+
+          height: "2px",
+
+          background: "rgba(255, 255, 255, 0.85)",
+
+          borderRadius: "50%",
+
+          top: "18%",
+
+          left: "14%",
+
+          animation: "errorParticle 9s ease-in-out infinite"
+
+        }}></div>
+
+        <div style={{
+
+          position: "absolute",
+
+          width: "3px",
+
+          height: "3px",
+
+          background: "rgba(255, 100, 100, 0.65)",
+
+          borderRadius: "50%",
+
+          top: "62%",
+
+          right: "18%",
+
+          animation: "errorParticle 12s ease-in-out infinite 1.4s"
+
+        }}></div>
+
+        <div style={{
+
+          position: "absolute",
+
+          width: "2px",
+
+          height: "2px",
+
+          background: "rgba(239, 68, 68, 0.7)",
+
+          borderRadius: "50%",
+
+          bottom: "22%",
+
+          left: "24%",
+
+          animation: "errorParticle 11s ease-in-out infinite 0.6s"
+
+        }}></div>
+
+
+        {/* Error card */}
+
+        <div style={{
+
+          background: "rgba(15, 23, 42, 0.74)",
+
+          backdropFilter: "blur(22px)",
+
+          borderRadius: "24px",
+
+          padding: "72px 64px",
+
+          boxShadow: "0 30px 80px rgba(0, 0, 0, 0.42), 0 0 90px rgba(239, 68, 68, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.09)",
+
+          textAlign: "center",
+
+          position: "relative",
+
+          zIndex: 10,
+
+          maxWidth: "520px",
+
+          border: "1px solid rgba(239, 68, 68, 0.22)",
+
+          overflow: "hidden"
+
+        }}>
+
+          <div style={{
+
+            position: "absolute",
+
+            top: 0,
+
+            left: "-40%",
+
+            width: "40%",
+
+            height: "100%",
+
+            background: "linear-gradient(90deg, rgba(239, 68, 68, 0), rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0))",
+
+            animation: "errorSweep 3.8s linear infinite"
+
+          }}></div>
+
+
+          {/* Error beacon */}
+
+          <div style={{
+
+            width: "112px",
+
+            height: "112px",
+
+            margin: "0 auto 26px",
+
+            position: "relative"
+
+          }}>
+
+            <div style={{
+
+              position: "absolute",
+
+              inset: 0,
+
+              borderRadius: "50%",
+
+              border: "2px solid rgba(239, 68, 68, 0.55)",
+
+              animation: "errorRing 2.2s ease-out infinite"
+
+            }}></div>
+
+            <div style={{
+
+              position: "absolute",
+
+              inset: "16px",
+
+              borderRadius: "50%",
+
+              border: "2px solid rgba(239, 68, 68, 0.4)",
+
+              animation: "errorRing 2.2s ease-out infinite 0.8s"
+
+            }}></div>
+
+            <div style={{
+
+              position: "absolute",
+
+              inset: "34px",
+
+              borderRadius: "50%",
+
+              background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+
+              boxShadow: "0 0 20px rgba(239, 68, 68, 0.65)",
+
+              animation: "errorCore 2.4s ease-in-out infinite"
+
+            }}></div>
+
+          </div>
+
+
+          {/* Heading */}
+
+          <h1 style={{
+
+            fontSize: "34px",
+
+            fontWeight: "800",
+
+            color: "#fee2e2",
+
+            margin: "0 0 10px 0",
+
+            letterSpacing: "-0.6px"
+
+          }}>
+
+            Unable to Load Store
+
+          </h1>
+
+
+          {/* Status badge */}
+
+          <div style={{
+
+            display: "inline-block",
+
+            background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+
+            color: "white",
+
+            padding: "8px 18px",
+
+            borderRadius: "50px",
+
+            fontSize: "13px",
+
+            fontWeight: "700",
+
+            marginBottom: "24px",
+
+            letterSpacing: "0.5px",
+
+            textTransform: "uppercase"
+
+          }}>
+
+            Error
+
+          </div>
+
+
+          {/* Error message */}
+
+          <div style={{
+
+            background: "rgba(30, 41, 59, 0.72)",
+
+            padding: "18px",
+
+            borderRadius: "14px",
+
+            border: "1px solid rgba(239, 68, 68, 0.3)",
+
+            marginBottom: "20px"
+
+          }}>
+
+            <p style={{
+
+              fontSize: "16px",
+
+              color: "#fee2e2",
+
+              margin: "0",
+
+              fontWeight: "500",
+
+              lineHeight: "1.6"
+
+            }}>
+
+              {merchantError || "An error occurred while loading the store"}
+
+            </p>
+
+          </div>
+
+
+          {/* Help text */}
+
+          <p style={{
+
+            fontSize: "14px",
+
+            color: "rgba(254, 226, 226, 0.78)",
+
+            margin: "0",
+
+            fontWeight: "400"
+
+          }}>
+
+            Please try refreshing the page or contact support if the problem persists.
+
+          </p>
+
+        </div>
+
+
+        <style>{`
+
+          @keyframes errorCore {
+
+            0%, 100% {
+
+              transform: scale(1);
+
+              opacity: 0.88;
+
+            }
+
+            50% {
+
+              transform: scale(1.18);
+
+              opacity: 1;
+
+            }
+
+          }
+
+          
+
+          @keyframes errorRing {
+
+            0% {
+
+              transform: scale(0.84);
+
+              opacity: 0.8;
+
+            }
+
+            100% {
+
+              transform: scale(1.3);
+
+              opacity: 0;
+
+            }
+
+          }
+
+
+          @keyframes errorParticle {
+
+            0%, 100% {
+
+              transform: translateY(0) translateX(0);
+
+              opacity: 0;
+
+            }
+
+            12% { opacity: 1; }
+
+            88% { opacity: 1; }
+
+            100% {
+
+              transform: translateY(-120px) translateX(45px);
+
+              opacity: 0;
+
+            }
+
+          }
+
+
+          @keyframes errorSweep {
+
+            0% { left: -45%; }
+
+            100% { left: 115%; }
+
+          }
+
+        `}</style>
+
+      </div>
+
+    );
+
+  }
 
 
   // Show inactive UI if merchant is not active

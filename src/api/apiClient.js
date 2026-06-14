@@ -141,8 +141,9 @@ export const findMerchantByName = async (merchantName) => {
         // API returns { success: true, data: { merchantId, ... } }
         return response.data?.data || response.data;
     } catch (error) {
-        console.error(`Merchant lookup failed for "${merchantName}":`, error?.message);
-        return null;
+        const errorMessage = error?.response?.data?.message || error?.response?.data?.error || error?.message || "Failed to find merchant";
+        console.error(`Merchant lookup failed for "${merchantName}":`, errorMessage);
+        return { error: true, message: errorMessage };
     }
 };
 
