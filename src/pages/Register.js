@@ -117,7 +117,7 @@ function Register() {
       <div className="login-container" style={{ backgroundColor: cardsBackgroundColor, color: cardsTextColor }}>
         <div className="login-header">
           <h1 style={{ color: cardsTextColor }}>Create Account</h1>
-          <p className="login-subtitle" style={{ color: mutedTextColor }}>Register with the same fields as prototype flow</p>
+          <p className="login-subtitle" style={{ color: mutedTextColor }}>Register your account in just a few simple steps</p>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>

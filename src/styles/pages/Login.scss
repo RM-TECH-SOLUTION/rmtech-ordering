@@ -145,6 +145,7 @@ $transition: all 0.3s ease;
   min-height: 100vh;
   background: var(--app-page-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
   padding: 2rem;
+  padding-top: 100px;
   @include flex-center;
   animation: fadeIn 0.5s ease-out;
 
