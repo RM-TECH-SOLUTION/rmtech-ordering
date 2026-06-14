@@ -1,40 +1,75 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube, FaApple, FaGooglePlay, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
+import { useSelector } from "react-redux";
+import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaYoutube, FaPhone, FaGlobe, FaMapMarkerAlt } from 'react-icons/fa';
 import '../styles/components/Footer.scss';
+
+const getReadableTextColor = (background, dark = "#111827", light = "#ffffff") => {
+  if (!background) {
+    return light;
+  }
+
+  const value = String(background).trim();
+  const hex = value.startsWith("#") ? value.slice(1) : value;
+
+  if (!/^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$/.test(hex)) {
+    return light;
+  }
+
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((char) => char + char)
+          .join("")
+      : hex;
+
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.56 ? light : dark;
+};
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const themeColors = useSelector((state) => state.homeReducer?.themeColors || {});
+  const merchantInfo = useSelector((state) => state.homeReducer?.merchantInfo || {});
+  const merchantName = merchantInfo?.merchantName || "FoodExpress";
+  const merchantLogo = merchantInfo?.logo || "";
+  const merchantPhoneNumber = merchantInfo?.merchantPhoneNumber;
+  const merchantLocation = merchantInfo?.merchantLocation || "";
+  const merchantWebLink = merchantInfo?.webLink || "";
+  const footerBackgroundColor = themeColors?.webBottombarBackgroundColor || "";
+  const footerTextColor = getReadableTextColor(footerBackgroundColor);
+  const footerMutedTextColor = footerTextColor === "#ffffff" ? "rgba(255, 255, 255, 0.76)" : "rgba(17, 24, 39, 0.72)";
+  const footerSoftLayerColor = footerTextColor === "#ffffff" ? "rgba(255, 255, 255, 0.12)" : "rgba(15, 23, 42, 0.12)";
+  const footerAccentLineColor = footerTextColor === "#ffffff" ? "rgba(255, 255, 255, 0.44)" : "rgba(15, 23, 42, 0.32)";
   
   return (
-    <footer className="footer">
+    <footer
+      className="footer"
+      style={{
+        "--footer-bg": footerBackgroundColor || undefined,
+        "--footer-text": footerTextColor,
+        "--footer-muted": footerMutedTextColor,
+        "--footer-layer-soft": footerSoftLayerColor,
+        "--footer-accent-line": footerAccentLineColor,
+      }}
+    >
       <div className="footer__container">
         
         {/* Top Section */}
         <div className="footer__top">
           <div className="footer__brand">
             <div className="brand-logo">
-              <span className="logo-icon">🍔</span>
-              <span className="logo-text">FoodExpress</span>
-            </div>
-            <p className="brand-tagline">
-              Delivering happiness to your doorstep, one meal at a time.
-            </p>
-            <div className="app-download">
-              <button className="app-btn app-btn--apple">
-                <FaApple className="icon" />
-                <div className="app-btn__text">
-                  <span className="app-btn__subtitle">Download on the</span>
-                  <span className="app-btn__title">App Store</span>
-                </div>
-              </button>
-              <button className="app-btn app-btn--google">
-                <FaGooglePlay className="icon" />
-                <div className="app-btn__text">
-                  <span className="app-btn__subtitle">Get it on</span>
-                  <span className="app-btn__title">Google Play</span>
-                </div>
-              </button>
+              {merchantLogo ? (
+                <img src={merchantLogo} alt={merchantName} className="logo-image" />
+              ) : (
+                <span className="logo-icon">🍔</span>
+              )}
+              <span className="logo-text">{merchantName}</span>
             </div>
           </div>
 
@@ -53,8 +88,8 @@ export default function Footer() {
               <ul className="links-list">
                 <li><Link to="/privacy-policy" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Privacy Policy</Link></li>
                 <li><Link to="/terms" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Terms and Conditions</Link></li>
-                <li><Link to="/refund-policy" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Cancellations and Refunds</Link></li>
-                <li><Link to="/contact" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Contact Us</Link></li>
+                {/* <li><Link to="/refund-policy" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Cancellations and Refunds</Link></li>
+                <li><Link to="/contact" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Contact Us</Link></li> */}
               </ul>
             </div>
           </div>
@@ -67,23 +102,21 @@ export default function Footer() {
                 <FaPhone className="contact-icon" />
                 <div className="contact-text">
                   <span className="contact-label">Call Us</span>
-                  <span className="contact-value">+91 8777370341 / 7013608102</span>
+                  <span className="contact-value">{merchantPhoneNumber ? `+91 ${merchantPhoneNumber}` : "Not available"}</span>
                 </div>
               </div>
-              <div className="contact-item">
-                <FaEnvelope className="contact-icon" />
-                <div className="contact-text">
-                  <span className="contact-label">Email Us</span>
-                  <span className="contact-value">contact@foodexpress@gmail.com</span>
-                </div>
-              </div>
-              {/* <div className="contact-item">
+              
+              {merchantLocation && (
+                <div className="contact-item">
                 <FaMapMarkerAlt className="contact-icon" />
                 <div className="contact-text">
-                  <span className="contact-label">Visit Us</span>
-                  <span className="contact-value">123 Food Street, New York</span>
+                  <span className="contact-label">Location</span>
+                  <a className="contact-value" href={merchantLocation} target="_blank" rel="noopener noreferrer">
+                    Open in Maps
+                  </a>
                 </div>
-              </div> */}
+              </div>
+              )}
             </div>
           </div>
         </div>
@@ -94,7 +127,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="footer__bottom">
           <div className="footer__copyright">
-            <p>© {currentYear} FoodExpress. All rights reserved. Crafted with ❤️ by RM Tech Solutions</p>
+            <p>© {currentYear} {merchantName}. All rights reserved. Crafted with ❤️ by RM Tech Solution</p>
           </div>
           
           {/* <div className="footer__social">

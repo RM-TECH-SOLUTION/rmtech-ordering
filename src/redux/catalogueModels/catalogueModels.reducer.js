@@ -8,13 +8,15 @@ const initialState = {
 const GET_CATALOGUE_MODELS = "catalogue/GET_CATALOGUE_MODELS";
 const SET_LOADING = "catalogue/SET_LOADING";
 
-export const getCatalogueModels = (merchantId) => async (dispatch) => {
+export const getCatalogueModels = () => async (dispatch) => {
     try {
         dispatch({ type: SET_LOADING, loading: true });
 
+        const params = apiClient.withContext();
+
         const response = await apiClient.get(
-            "/getCatalogueModels",
-            { merchantId }
+            apiClient.Urls.getCatalogueModels,
+            params
         );
 
         if (response?.success) {

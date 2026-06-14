@@ -7,6 +7,7 @@ import ordersReducer from "./orders/orders.reducer";
 import authReducer from "./auth/auth.reducer";
 import addressReducer from "./address/address.reducer";
 import homeReducer from "./Home/home.reducer"
+import mainCataloguesReducer from "./mainCatalogues/mainCatalogues.reducer";
 
 const rootReducer = combineReducers({
     auth: authReducer,
@@ -14,6 +15,7 @@ const rootReducer = combineReducers({
     catalogueModels: catalogueModelsReducer,
     catalogueItems: catalogueItemsReducer,
     cart: cartReducer,
+    mainCatalogues: mainCataloguesReducer,
     orders: ordersReducer,
     address: addressReducer,
     homeReducer:homeReducer

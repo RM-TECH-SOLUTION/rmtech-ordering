@@ -8,13 +8,18 @@ const initialState = {
 const GET_CATALOGUE_ITEMS = "items/GET_CATALOGUE_ITEMS";
 const SET_LOADING = "items/SET_LOADING";
 
-export const getCatalogueItems = (catalogueModelId, merchantId) => async (dispatch) => {
+export const getCatalogueItems = (catalogueModelId) => async (dispatch) => {
     try {
         dispatch({ type: SET_LOADING, loading: true });
 
+        const params = apiClient.withContext({
+            catalogueModelId,
+            catalogModelId: catalogueModelId
+        });
+
         const response = await apiClient.get(
-            "/getCatalogueItems",
-            { catalogueModelId, merchantId }
+            apiClient.Urls.getCatalogueItems,
+            params
         );
 
         if (response?.success) {

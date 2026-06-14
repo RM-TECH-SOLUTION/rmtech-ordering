@@ -1,73 +1,97 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { login } from "../redux/auth/auth.reducer";
+import { useDispatch, useSelector } from "react-redux";
+import { clearError, login } from "../redux/auth/auth.reducer";
 import { useNavigate } from "react-router-dom";
 import "../styles/pages/Login.scss";
 
+const getReadableTextColor = (background, dark = "#111827", light = "#ffffff") => {
+  if (!background) {
+    return dark;
+  }
+
+  const value = String(background).trim();
+  const hex = value.startsWith("#") ? value.slice(1) : value;
+
+  if (!/^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$/.test(hex)) {
+    return dark;
+  }
+
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((char) => char + char)
+          .join("")
+      : hex;
+
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.56 ? light : dark;
+};
+
 function Login() {
-  const [phone, setPhone] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [identity, setIdentity] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isLoading, error: apiError } = useSelector((state) => state.auth);
+  const themeColors = useSelector((state) => state.homeReducer?.themeColors || {});
+
+  const cardsBackgroundColor = themeColors?.cardsBackgroundColor || "#ffffff";
+  const primaryButtonBackgroundColor = themeColors?.primaryButtonBackgroundColor || "#ff7a18";
+  const cardsTextColor = getReadableTextColor(cardsBackgroundColor, "#111827", "#ffffff");
+  const buttonTextColor = getReadableTextColor(primaryButtonBackgroundColor, "#111827", "#ffffff");
+  const isCardDark = cardsTextColor === "#ffffff";
+  const mutedTextColor = isCardDark ? "rgba(255, 255, 255, 0.8)" : "rgba(17, 24, 39, 0.72)";
+  const fieldBackgroundColor = isCardDark ? "rgba(255, 255, 255, 0.08)" : "#f8fafc";
+  const fieldBorderColor = isCardDark ? "rgba(255, 255, 255, 0.28)" : "#e2e8f0";
 
   // Auto-focus input on mount
   useEffect(() => {
-    const phoneInput = document.getElementById("phone-input");
-    if (phoneInput) phoneInput.focus();
+    const identityInput = document.getElementById("identity-input");
+    if (identityInput) identityInput.focus();
   }, []);
 
-  // Validate phone number
-  const validatePhone = (number) => {
-    const cleaned = number.replace(/\D/g, "");
-    return cleaned.length >= 10;
-  };
-
-  // Format phone number as user types
-  const formatPhoneNumber = (value) => {
-    const cleaned = value.replace(/\D/g, "");
-    const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
-    if (match) {
-      return !match[2] ? match[1] : `(${match[1]}) ${match[2]}${match[3] ? `-${match[3]}` : ''}`;
-    }
-    return cleaned;
-  };
-
-  const handlePhoneChange = (e) => {
-    const formatted = formatPhoneNumber(e.target.value);
-    setPhone(formatted);
+  const handleIdentityChange = (e) => {
+    setIdentity(e.target.value);
     setError("");
+    if (apiError) {
+      dispatch(clearError());
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    setError("");
+    if (apiError) {
+      dispatch(clearError());
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const cleanedPhone = phone.replace(/\D/g, "");
 
-    if (!cleanedPhone) {
-      setError("Please enter a mobile number");
+    if (!identity.trim() || !password.trim()) {
+      setError("Please enter email/phone and password");
       return;
     }
 
-    if (!validatePhone(cleanedPhone)) {
-      setError("Please enter a valid 10-digit mobile number");
-      return;
-    }
+    const result = await dispatch(
+      login({
+        identity: identity.trim(),
+        password,
+      })
+    );
 
-    setIsLoading(true);
-    setError("");
-
-    // Simulate API call with timeout
-    setTimeout(() => {
-      dispatch(
-        login({
-          id: Date.now(),
-          phone: cleanedPhone,
-        })
-      );
-
-      setIsLoading(false);
+    if (result?.success) {
       navigate("/categories");
-    }, 1500);
+    } else {
+      setError(result?.message || "Login failed");
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -78,38 +102,61 @@ function Login() {
 
   return (
     <div className="login-page">
-      <div className="login-container">
+      <div className="login-container" style={{ backgroundColor: cardsBackgroundColor, color: cardsTextColor }}>
         {/* Header */}
         <div className="login-header">
-          <div className="login-icon">
-            <span>📱</span>
-          </div>
-          <h1>Welcome Back</h1>
-          <p className="login-subtitle">Sign in with your mobile number</p>
+          <h1 style={{ color: cardsTextColor }}>Welcome Back</h1>
+          <p className="login-subtitle" style={{ color: mutedTextColor }}>Login with email/phone and password</p>
         </div>
 
         {/* Form */}
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="phone-input">Mobile Number</label>
+            <label htmlFor="identity-input" style={{ color: cardsTextColor }}>Email or Phone</label>
             <div className="input-wrapper">
-              <span className="input-icon">📞</span>
+              <span className="input-icon" style={{ color: mutedTextColor }}>👤</span>
               <input
-                id="phone-input"
-                type="tel"
-                placeholder="(123) 456-7890"
-                value={phone}
-                onChange={handlePhoneChange}
+                id="identity-input"
+                type="text"
+                placeholder="Enter email or phone"
+                value={identity}
+                onChange={handleIdentityChange}
                 onKeyPress={handleKeyPress}
-                maxLength="14"
-                className={error ? "has-error" : ""}
+                className={error || apiError ? "has-error" : ""}
+                style={{
+                  color: cardsTextColor,
+                  backgroundColor: fieldBackgroundColor,
+                  borderColor: error || apiError ? "#e53e3e" : fieldBorderColor,
+                }}
                 disabled={isLoading}
               />
             </div>
-            {error && (
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password-input" style={{ color: cardsTextColor }}>Password</label>
+            <div className="input-wrapper">
+              <span className="input-icon" style={{ color: mutedTextColor }}>🔒</span>
+              <input
+                id="password-input"
+                type="password"
+                placeholder="Enter password"
+                value={password}
+                onChange={handlePasswordChange}
+                onKeyPress={handleKeyPress}
+                className={error || apiError ? "has-error" : ""}
+                style={{
+                  color: cardsTextColor,
+                  backgroundColor: fieldBackgroundColor,
+                  borderColor: error || apiError ? "#e53e3e" : fieldBorderColor,
+                }}
+                disabled={isLoading}
+              />
+            </div>
+            {(error || apiError) && (
               <div className="error-message">
                 <span className="error-icon">⚠️</span>
-                {error}
+                {error || apiError}
               </div>
             )}
           </div>
@@ -117,23 +164,33 @@ function Login() {
           <button
             type="submit"
             className="login-button"
-            disabled={isLoading || !phone.replace(/\D/g, "")}
+            style={{
+              backgroundColor: primaryButtonBackgroundColor,
+              color: buttonTextColor,
+            }}
+            disabled={isLoading || !identity.trim() || !password.trim()}
           >
             <div className="button-content">
               {isLoading ? (
                 <>
-                  <div className="spinner"></div>
-                  <span>Signing In...</span>
+                  <div className="spinner" style={{ borderColor: `${buttonTextColor}44`, borderTopColor: buttonTextColor }}></div>
+                  <span style={{ color: buttonTextColor }}>Signing In...</span>
                 </>
               ) : (
                 <>
-                  <span>🔑</span>
-                  <span>Sign In</span>
+                  <span style={{ color: buttonTextColor }}>🔑</span>
+                  <span style={{ color: buttonTextColor }}>Sign In</span>
                 </>
               )}
             </div>
           </button>
         </form>
+
+        <div className="login-footer">
+          <p>
+            Don&apos;t have an account? <button type="button" className="link-btn" onClick={() => navigate("/register")}>Register</button>
+          </p>
+        </div>
 
       </div>
     </div>

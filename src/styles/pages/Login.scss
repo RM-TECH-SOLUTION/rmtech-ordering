@@ -143,7 +143,7 @@ $transition: all 0.3s ease;
 // Main Container
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--app-page-bg, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
   padding: 2rem;
   @include flex-center;
   animation: fadeIn 0.5s ease-out;
@@ -326,6 +326,21 @@ $transition: all 0.3s ease;
     color: $text-light;
     border: 1px dashed $border-color;
     margin-top: 1rem;
+  }
+}
+
+.link-btn {
+  border: none;
+  background: transparent;
+  color: $primary-color;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+
+  &:hover {
+    color: $primary-hover;
+    text-decoration: underline;
   }
 }
 

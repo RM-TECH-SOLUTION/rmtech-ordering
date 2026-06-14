@@ -3,7 +3,7 @@
 
 .order-history {
   padding: 30px 5% 60px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: var(--app-page-bg, linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%));
   min-height: calc(100vh - 70px);
   
   @media (max-width: 768px) {
