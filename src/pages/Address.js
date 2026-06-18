@@ -802,34 +802,6 @@ function Address() {
                 )}
               </div>
             </div>
-
-            {/* Delivery Information */}
-            <div className="delivery-info">
-              <h4 className="info-title">Delivery Information</h4>
-              <ul className="info-list">
-                <li>
-                  <div className="info-icon">🚚</div>
-                  <div className="info-content">
-                    <strong>Free Delivery</strong>
-                    <span>on orders above ₹499</span>
-                  </div>
-                </li>
-                <li>
-                  <div className="info-icon">⏰</div>
-                  <div className="info-content">
-                    <strong>30-45 Minutes</strong>
-                    <span>average delivery time</span>
-                  </div>
-                </li>
-                <li>
-                  <div className="info-icon">📍</div>
-                  <div className="info-content">
-                    <strong>Accurate Address</strong>
-                    <span>ensures timely delivery</span>
-                  </div>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
