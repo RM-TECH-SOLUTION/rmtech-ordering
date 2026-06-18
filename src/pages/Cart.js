@@ -115,16 +115,26 @@ function Cart() {
  <div className="cart__items-list">
  {cartItems.map((item) => (
  <div key={item.id} className="cart-item">
+ <div className="cart-item__media">
  <div className="cart-item__image">
  <img 
  src={item.images?.[0] || "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38"} 
  alt={item.name}
  />
  </div>
+ <span className="cart-item__status">In Cart</span>
+ </div>
  
  <div className="cart-item__details">
  <div className="cart-item__header">
+ <div className="cart-item__title-group">
  <h4 className="cart-item__name">{item.name}</h4>
+ {item.originalPrice && Number(item.originalPrice) > Number(item.price) && (
+ <span className="cart-item__saving">
+ Save ₹{Math.max(Number(item.originalPrice) - Number(item.price), 0)}
+ </span>
+ )}
+ </div>
  <button 
  className="cart-item__remove"
  onClick={() => dispatch(removeItemCompletely(item))}
@@ -138,11 +148,14 @@ function Cart() {
  </p>
  
  <div className="cart-item__footer">
+ <div className="cart-item__price-block">
+ <span className="cart-item__price-label">Price</span>
  <div className="cart-item__price">
  <span className="current-price">₹{item.price}</span>
  {item.originalPrice && (
  <span className="original-price">₹{item.originalPrice}</span>
  )}
+ </div>
  </div>
  
  <div className="cart-item__controls">
@@ -163,7 +176,8 @@ function Cart() {
  </div>
  
  <div className="cart-item__total">
- Total: <span>₹{Number(item.price) * item.qty}</span>
+ <span className="cart-item__total-label">Item total</span>
+ <span>₹{Number(item.price) * item.qty}</span>
  </div>
  </div>
  </div>
