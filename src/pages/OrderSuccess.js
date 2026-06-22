@@ -12,24 +12,32 @@ function OrderSuccess() {
   }, [dispatch]);
 
   return (
-    <div style={{ padding: 40, textAlign: "center" }}>
+    <div
+      style={{
+        flex: "1 0 auto",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+        boxSizing: "border-box",
+        textAlign: "center",
+      }}
+    >
+      <div style={{ maxWidth: 520, width: "100%" }}>
       <h2>🎉 Order Placed Successfully!</h2>
       <p>Your order has been placed.</p>
 
       <button
-        onClick={() => navigate("/categories")}
+        className="btn btn--primary"
+        onClick={() => navigate("/profile?tab=orders")}
         style={{
-          background: "#ff7a18",
-          color: "#fff",
-          border: "none",
-          padding: "12px 18px",
-          borderRadius: 8,
           marginTop: 20,
-          cursor: "pointer"
         }}
       >
-        Order More
+        Order History
       </button>
+      </div>
     </div>
   );
 }

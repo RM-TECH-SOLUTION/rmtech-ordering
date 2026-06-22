@@ -1,583 +1,296 @@
-import React, { useState } from 'react';
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { FaCheckCircle, FaGift, FaShoppingBag, FaTruck } from "react-icons/fa";
+import apiClient from "../api/apiClient";
 import "../styles/pages/OrderHistory.scss";
-import {
-  FaShoppingBag,
-  FaCalendarAlt,
-  FaMapMarkerAlt,
-  FaCreditCard,
-  FaBox,
-  FaShippingFast,
-  FaCheckCircle,
-  FaClock,
-  FaTimesCircle,
-  FaFilter,
-  FaSearch,
-  FaArrowRight,
-  FaRedo,
-  FaStar,
-  FaTruck,
-  FaHome,
-  FaPhone,
-  FaUndo,
-  FaEye
-} from "react-icons/fa";
 
-function OrderHistory() {
-  const orders = useSelector((state) => state.orders.orders || []);
-  const navigate = useNavigate();
-  
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+const NORMAL_STEPS = ["pending", "accepted", "shipped", "delivered"];
+const REJECTED_STEPS = ["pending", "rejected", "accepted", "shipped", "delivered"];
 
-  // Format date function
-  const formatDate = (dateString) => {
-    if (!dateString) return "Date not available";
-    
-    try {
-      const options = { 
-        weekday: 'short', 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      };
-      return new Date(dateString).toLocaleDateString('en-US', options);
-    } catch (error) {
-      return "Invalid date";
+const STEP_LABELS = {
+ pending: "Order",
+ rejected: "Rejected",
+ accepted: "Accepted",
+ shipped: "Shipped",
+ delivered: "Delivered",
+};
+
+const normalizeConfig = (payload) => {
+ const fromFieldMap = (source) =>
+  Object.values(source || {}).reduce((acc, field) => {
+   if (field?.fieldKey) {
+    acc[field.fieldKey] = field?.fieldValue;
+   }
+   return acc;
+  }, {});
+
+ if (Array.isArray(payload)) {
+  const first = payload[0];
+  if (first?.cms && typeof first.cms === "object") {
+   return fromFieldMap(first.cms);
+  }
+  if (first?.fieldKey) {
+   return payload.reduce((acc, field) => {
+    if (field?.fieldKey) {
+     acc[field.fieldKey] = field?.fieldValue;
     }
-  };
+    return acc;
+   }, {});
+  }
+ }
 
-  // Get order ID as string and truncate if needed
-  const getOrderId = (orderId) => {
-    if (!orderId) return 'N/A';
-    
-    // Convert to string if it's a number
-    const idString = orderId.toString();
-    
-    // Take last 8 characters for display
-    return idString.length > 8 ? idString.slice(-8) : idString;
-  };
+ if (payload?.cms && typeof payload.cms === "object") {
+  return fromFieldMap(payload.cms);
+ }
 
-  // Calculate total items in an order
-  const calculateTotalItems = (items) => {
-    if (!items || !Array.isArray(items)) return 0;
-    return items.reduce((total, item) => total + (item.qty || 0), 0);
-  };
+ return payload && typeof payload === "object" ? payload : {};
+};
 
-  // Get status icon and color
-  const getStatusInfo = (status) => {
-    const statusLower = (status || '').toLowerCase();
-    
-    switch(statusLower) {
-      case 'delivered':
-        return {
-          icon: <FaCheckCircle />,
-          color: '#1dbf73',
-          bgColor: 'rgba(29, 191, 115, 0.1)',
-          label: 'Delivered'
-        };
-      case 'shipped':
-      case 'on the way':
-      case 'ontheway':
-        return {
-          icon: <FaShippingFast />,
-          color: '#2196f3',
-          bgColor: 'rgba(33, 150, 243, 0.1)',
-          label: 'Shipped'
-        };
-      case 'processing':
-        return {
-          icon: <FaBox />,
-          color: '#ffa726',
-          bgColor: 'rgba(255, 167, 38, 0.1)',
-          label: 'Processing'
-        };
-      case 'pending':
-        return {
-          icon: <FaClock />,
-          color: '#ffa726',
-          bgColor: 'rgba(255, 167, 38, 0.1)',
-          label: 'Pending'
-        };
-      case 'cancelled':
-        return {
-          icon: <FaTimesCircle />,
-          color: '#ff6b6b',
-          bgColor: 'rgba(255, 107, 107, 0.1)',
-          label: 'Cancelled'
-        };
-      default:
-        return {
-          icon: <FaClock />,
-          color: '#718096',
-          bgColor: 'rgba(113, 128, 150, 0.1)',
-          label: status || 'Unknown'
-        };
-    }
-  };
+const normalizeOrders = (response) => {
+ const source = response?.data || response?.orders || response?.orderHistoryResponse || response;
+ return Array.isArray(source) ? source : [];
+};
 
-  // Calculate order total
-  const calculateOrderTotal = (order) => {
-    if (order.total !== undefined) return order.total;
-    if (order.items && Array.isArray(order.items)) {
-      return order.items.reduce((sum, item) => 
-        sum + (Number(item.price || 0) * (item.qty || 0)), 0
-      );
-    }
-    return 0;
-  };
-
-  // Filter and sort orders
-  const filteredOrders = orders
-    .filter(order => {
-      // Search filter
-      const searchLower = searchTerm.toLowerCase();
-      const orderIdString = order.id ? order.id.toString() : '';
-      const matchesSearch = 
-        orderIdString.includes(searchLower) ||
-        (order.items && Array.isArray(order.items) && order.items.some(item => 
-          (item.name || '').toLowerCase().includes(searchLower)
-        )) ||
-        (order.status || '').toLowerCase().includes(searchLower);
-      
-      // Status filter
-      const matchesStatus = 
-        statusFilter === 'all' || 
-        (order.status || '').toLowerCase() === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      // Sort by date
-      const dateA = a.date || a.createdAt || 0;
-      const dateB = b.date || b.createdAt || 0;
-      
-      if (sortBy === 'newest') {
-        return new Date(dateB) - new Date(dateA);
-      } else if (sortBy === 'oldest') {
-        return new Date(dateA) - new Date(dateB);
-      } else if (sortBy === 'highest') {
-        return calculateOrderTotal(b) - calculateOrderTotal(a);
-      } else if (sortBy === 'lowest') {
-        return calculateOrderTotal(a) - calculateOrderTotal(b);
-      }
-      return 0;
-    });
-
-  // Get status counts for filter tabs
-  const statusCounts = {
-    all: orders.length,
-    delivered: orders.filter(o => (o.status || '').toLowerCase() === 'delivered').length,
-    shipped: orders.filter(o => (o.status || '').toLowerCase() === 'shipped').length,
-    processing: orders.filter(o => (o.status || '').toLowerCase() === 'processing').length,
-    pending: orders.filter(o => (o.status || '').toLowerCase() === 'pending').length,
-    cancelled: orders.filter(o => (o.status || '').toLowerCase() === 'cancelled').length,
-  };
-
-  if (orders.length === 0) {
-    return (
-      <div className="order-history-empty">
-        <div className="empty-container">
-          <div className="empty-icon">
-            <FaShoppingBag />
-          </div>
-          <h2 className="empty-title">No Orders Yet</h2>
-          <p className="empty-description">
-            You haven't placed any orders yet. Start shopping to see your order history here.
-          </p>
-          <button 
-            className="btn btn--primary"
-            onClick={() => navigate("/categories")}
-          >
-            <FaShoppingBag className="icon" />
-            Start Shopping
-          </button>
-          <div className="empty-actions">
-            <button 
-              className="btn btn--outline"
-              onClick={() => navigate("/")}
-            >
-              <FaArrowRight className="icon" />
-              Go to Home
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+const getReadableTextColor = (background, dark = "#111827", light = "#ffffff") => {
+  if (!background) {
+    return dark;
   }
 
+  const value = String(background).trim();
+  const hex = value.startsWith("#") ? value.slice(1) : value;
+
+  if (!/^[0-9a-fA-F]{3}$|^[0-9a-fA-F]{6}$/.test(hex)) {
+    return dark;
+  }
+
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((char) => char + char)
+          .join("")
+      : hex;
+
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.56 ? light : dark;
+};
+
+const getStatusMeta = (status) => {
+ const normalized = String(status || "pending").toLowerCase();
+
+ if (normalized === "delivered") {
+  return { label: "Delivered", tone: "success" };
+ }
+
+ if (normalized === "rejected" || normalized === "cancelled" || normalized === "canceled") {
+  return { label: "Rejected", tone: "danger" };
+ }
+
+ if (normalized === "shipped") {
+  return { label: "Shipped", tone: "info" };
+ }
+
+ if (normalized === "accepted") {
+  return { label: "Accepted", tone: "neutral" };
+ }
+
+ return { label: "Pending", tone: "warning" };
+};
+
+function OrderHistory() {
+ const themeColors = useSelector((state) => state.homeReducer?.themeColors || {});
+ const [orders, setOrders] = useState([]);
+ const [loading, setLoading] = useState(true);
+ const [uiConfig, setUiConfig] = useState({});
+
+ useEffect(() => {
+  const loadData = async () => {
+   setLoading(true);
+   try {
+    const [ordersResponse, configResponse] = await Promise.all([
+     apiClient.get("/order_history.php", apiClient.withContext({})),
+     apiClient.get(
+      apiClient.Urls.getContentModel,
+      apiClient.withContext({ modelSlug: "orderHistoryConfig" })
+     ),
+    ]);
+
+    setOrders(normalizeOrders(ordersResponse));
+    setUiConfig(normalizeConfig(configResponse?.data ?? configResponse));
+   } catch (error) {
+    setOrders([]);
+   } finally {
+    setLoading(false);
+   }
+  };
+
+  loadData();
+ }, []);
+
+ const pageBg =
+  themeColors?.webBackgroundColor ||
+  "var(--app-page-bg, linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%))";
+ const cardBg = themeColors?.cardsBackgroundColor || "var(--cart-card-bg, #ffffff)";
+ const progressOff = uiConfig?.progressBarColor || "#d1d5db";
+ const progressOn = uiConfig?.progressBarFillColor || "#16a34a";
+ const titleColor = getReadableTextColor(cardBg, "#111827", "#ffffff");
+ const subTitleColor = getReadableTextColor(cardBg, "#475569", "#e2e8f0");
+ const sortedOrders = useMemo(() => {
+  return [...orders].sort((a, b) => new Date(b?.created_at || 0) - new Date(a?.created_at || 0));
+ }, [orders]);
+
+ const deliveredCount = useMemo(() => {
+  return sortedOrders.filter((order) => String(order?.order_status || "").toLowerCase() === "delivered").length;
+ }, [sortedOrders]);
+
+ const totalEarnedPoints = useMemo(() => {
+  return sortedOrders.reduce((sum, order) => sum + Number(order?.earned_points || 0), 0);
+ }, [sortedOrders]);
+
+ const renderProgress = (status) => {
+  const normalizedStatus = String(status || "pending").toLowerCase();
+  const isRejected = normalizedStatus === "rejected";
+  const steps = isRejected ? REJECTED_STEPS : NORMAL_STEPS;
+  const currentStep = steps.indexOf(normalizedStatus);
+
   return (
-    <div className="order-history">
-      <div className="order-history__container">
-        {/* Header */}
-        <div className="order-history__header">
-          <div className="header-content">
-            <h1 className="order-history__title">
-              <FaShoppingBag className="icon" />
-              Order History
-            </h1>
-            <p className="order-history__subtitle">
-              Track and manage all your previous orders in one place
-            </p>
-          </div>
-          <div className="order-stats">
-            <div className="stat-card">
-              <div className="stat-icon">
-                <FaShoppingBag />
-              </div>
-              <div className="stat-info">
-                <span className="stat-label">Total Orders</span>
-                <span className="stat-value">{orders.length}</span>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon">
-                <FaCheckCircle />
-              </div>
-              <div className="stat-info">
-                <span className="stat-label">Delivered</span>
-                <span className="stat-value">
-                  {orders.filter(o => (o.status || '').toLowerCase() === 'delivered').length}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+   <div className="oh-progress">
+    {steps.map((step, index) => {
+     const active = index <= currentStep;
+     const isRejectedStep = step === "rejected";
+     const fillColor = active && isRejectedStep ? "#e53935" : active ? progressOn : progressOff;
 
-        {/* Filters Section */}
-        <div className="order-history__filters">
-          <div className="search-container">
-            <div className="search-input-wrapper">
-              <FaSearch className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search orders by ID, item name, or status..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-              {searchTerm && (
-                <button 
-                  className="clear-search"
-                  onClick={() => setSearchTerm("")}
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Status Filter Tabs */}
-          <div className="status-filter">
-            <div className="filter-header">
-              <FaFilter className="icon" />
-              <span>Filter by Status</span>
-            </div>
-            <div className="filter-tabs">
-              {Object.entries(statusCounts).map(([status, count]) => (
-                <button
-                  key={status}
-                  className={`filter-tab ${statusFilter === status ? 'active' : ''}`}
-                  onClick={() => setStatusFilter(status)}
-                >
-                  <span className="tab-label">
-                    {status === 'all' ? 'All Orders' : status.charAt(0).toUpperCase() + status.slice(1)}
-                  </span>
-                  <span className="tab-count">{count}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Sort Options */}
-          <div className="sort-options">
-            <div className="sort-header">
-              <span>Sort by</span>
-            </div>
-            <select 
-              className="sort-select"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="highest">Highest Amount</option>
-              <option value="lowest">Lowest Amount</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Results Count */}
-        <div className="results-info">
-          <span className="results-count">
-            Showing {filteredOrders.length} of {orders.length} orders
-          </span>
-          {searchTerm && (
-            <button 
-              className="btn btn--text"
-              onClick={() => setSearchTerm("")}
-            >
-              Clear Search
-            </button>
-          )}
-        </div>
-
-        {/* Orders Grid */}
-        <div className="orders-grid">
-          {filteredOrders.length === 0 ? (
-            <div className="no-results">
-              <div className="no-results-icon">
-                <FaSearch />
-              </div>
-              <h3>No orders found</h3>
-              <p>Try adjusting your search or filter criteria</p>
-              <button 
-                className="btn btn--outline"
-                onClick={() => {
-                  setSearchTerm("");
-                  setStatusFilter("all");
-                }}
-              >
-                <FaUndo className="icon" />
-                Reset Filters
-              </button>
-            </div>
-          ) : (
-            filteredOrders.map((order) => {
-              const statusInfo = getStatusInfo(order.status);
-              const totalItems = calculateTotalItems(order.items);
-              const orderTotal = calculateOrderTotal(order);
-              
-              return (
-                <div key={order.id || Math.random()} className="order-card">
-                  {/* Order Header */}
-                  <div className="order-card__header">
-                    <div className="order-info">
-                      <div className="order-id">
-                        <FaShoppingBag className="icon" />
-                        <span>Order #{getOrderId(order.id)}</span>
-                      </div>
-                      <div className="order-date">
-                        <FaCalendarAlt className="icon" />
-                        <span>{formatDate(order.date || order.createdAt)}</span>
-                      </div>
-                    </div>
-                    <div 
-                      className="order-status"
-                      style={{ 
-                        color: statusInfo.color,
-                        backgroundColor: statusInfo.bgColor
-                      }}
-                    >
-                      {statusInfo.icon}
-                      <span>{statusInfo.label}</span>
-                    </div>
-                  </div>
-
-                  {/* Order Items */}
-                  <div className="order-card__items">
-                    <h4 className="items-title">
-                      Items ({totalItems})
-                    </h4>
-                    <div className="items-list">
-                      {order.items && Array.isArray(order.items) && order.items.slice(0, 3).map((item, index) => (
-                        <div key={`${item.id || index}-${index}`} className="order-item">
-                          <div className="item-info">
-                            <div className="item-name">{item.name || "Unnamed Item"}</div>
-                            <div className="item-meta">
-                              <span className="item-price">₹{item.price || 0}</span>
-                              <span className="item-qty">× {item.qty || 0}</span>
-                            </div>
-                          </div>
-                          <div className="item-total">
-                            ₹{Number(item.price || 0) * (item.qty || 0)}
-                          </div>
-                        </div>
-                      ))}
-                      {order.items && order.items.length > 3 && (
-                        <div className="more-items">
-                          + {order.items.length - 3} more items
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Order Summary */}
-                  <div className="order-card__summary">
-                    <div className="summary-row">
-                      <div className="summary-label">
-                        <FaBox className="icon" />
-                        <span>Items Total</span>
-                      </div>
-                      <div className="summary-value">
-                        ₹{(order.items || []).reduce((sum, item) => 
-                          sum + (Number(item.price || 0) * (item.qty || 0)), 0
-                        )}
-                      </div>
-                    </div>
-                    {order.deliveryFee !== undefined && (
-                      <div className="summary-row">
-                        <div className="summary-label">
-                          <FaTruck className="icon" />
-                          <span>Delivery Fee</span>
-                        </div>
-                        <div className="summary-value">
-                          {order.deliveryFee === 0 ? 'FREE' : `₹${order.deliveryFee}`}
-                        </div>
-                      </div>
-                    )}
-                    {order.discount !== undefined && order.discount > 0 && (
-                      <div className="summary-row discount">
-                        <div className="summary-label">
-                          <FaStar className="icon" />
-                          <span>Discount</span>
-                        </div>
-                        <div className="summary-value">
-                          -₹{order.discount}
-                        </div>
-                      </div>
-                    )}
-                    <div className="summary-row total">
-                      <div className="summary-label">
-                        <strong>Total Amount</strong>
-                      </div>
-                      <div className="summary-value total-amount">
-                        ₹{orderTotal}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Payment & Address */}
-                  <div className="order-card__details">
-                    <div className="detail-section">
-                      <div className="detail-header">
-                        <FaCreditCard className="icon" />
-                        <span>Payment Method</span>
-                      </div>
-                      <div className="detail-content">
-                        <span className={`payment-method ${(order.paymentMethod || '').toLowerCase()}`}>
-                          {order.paymentMethod === 'COD' ? 'Cash on Delivery' : 
-                           order.paymentMethod === 'ONLINE' ? 'Online Payment' : 
-                           order.paymentMethod || 'Not specified'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {order.address && (
-                      <div className="detail-section">
-                        <div className="detail-header">
-                          <FaMapMarkerAlt className="icon" />
-                          <span>Delivery Address</span>
-                        </div>
-                        <div className="detail-content">
-                          <div className="address-info">
-                            <div className="address-line">
-                              <FaHome className="icon" />
-                              <span>{order.address.addressLine || 'Address not specified'}</span>
-                            </div>
-                            {(order.address.city || order.address.state || order.address.pincode) && (
-                              <div className="address-city">
-                                {[order.address.city, order.address.state, order.address.pincode]
-                                  .filter(Boolean)
-                                  .join(', ')}
-                              </div>
-                            )}
-                            {order.address.phone && (
-                              <div className="address-contact">
-                                <FaPhone className="icon" />
-                                <span>{order.address.phone}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Order Actions */}
-                  <div className="order-card__actions">
-                    <button 
-                      className="btn btn--outline"
-                      onClick={() => {
-                        // Navigate to order details page if available
-                        // Or show order details modal
-                        console.log('View details for order:', order.id);
-                      }}
-                    >
-                      <FaEye className="icon" />
-                      View Details
-                    </button>
-                    {statusInfo.label === 'Delivered' && (
-                      <button 
-                        className="btn btn--primary"
-                        onClick={() => {
-                          // Reorder functionality
-                          console.log('Reorder:', order.id);
-                        }}
-                      >
-                        <FaRedo className="icon" />
-                        Reorder
-                      </button>
-                    )}
-                    {statusInfo.label === 'Cancelled' && (
-                      <button 
-                        className="btn btn--primary"
-                        onClick={() => navigate("/categories")}
-                      >
-                        <FaShoppingBag className="icon" />
-                        Shop Again
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-
-        {/* Load More / Pagination (if needed) */}
-        {filteredOrders.length > 0 && (
-          <div className="load-more">
-            <button className="btn btn--outline">
-              Load More Orders
-            </button>
-          </div>
-        )}
-
-        {/* Help Section */}
-        <div className="order-history__help">
-          <h3>Need Help with Your Orders?</h3>
-          <div className="help-actions">
-            <button className="help-action">
-              <div className="help-icon">📞</div>
-              <div className="help-content">
-                <strong>Contact Support</strong>
-                <span>24/7 Customer Service</span>
-              </div>
-            </button>
-            <button className="help-action">
-              <div className="help-icon">📦</div>
-              <div className="help-content">
-                <strong>Track Order</strong>
-                <span>Real-time Tracking</span>
-              </div>
-            </button>
-            <button className="help-action">
-              <div className="help-icon">🔄</div>
-              <div className="help-content">
-                <strong>Return/Exchange</strong>
-                <span>Easy Returns</span>
-              </div>
-            </button>
-          </div>
-        </div>
+     return (
+      <div key={`${step}-${index}`} className="oh-progress__step">
+       <span className="oh-progress__dot" style={{ backgroundColor: fillColor }} />
+       {index !== steps.length - 1 && (
+        <span
+         className="oh-progress__line"
+         style={{ backgroundColor: index < currentStep ? fillColor : progressOff }}
+        />
+       )}
+       <span className="oh-progress__label" style={{ color: fillColor }}>
+        {STEP_LABELS[step]}
+       </span>
       </div>
-    </div>
+     );
+    })}
+   </div>
   );
+ };
+
+ if (loading) {
+  return (
+   <div className="order-history" style={{ background: pageBg }}>
+    <div className="order-history__shell">
+     <p className="order-history__state" style={{ color: subTitleColor }}>Loading order history...</p>
+    </div>
+   </div>
+  );
+ }
+
+ if (!sortedOrders.length) {
+  return (
+   <div className="order-history" style={{ background: pageBg }}>
+    <div className="order-history__shell">
+     <div className="order-history__empty" style={{ color: titleColor }}>
+      <FaShoppingBag className="icon" />
+      <p>No orders found</p>
+     </div>
+    </div>
+   </div>
+  );
+ }
+
+ return (
+  <div
+  className="order-history"
+  style={{
+   background: pageBg,
+   "--oh-card-bg": cardBg,
+   "--oh-title": titleColor,
+   "--oh-subtitle": subTitleColor,
+   "--oh-progress-off": progressOff,
+   "--oh-progress-on": progressOn,
+  }}
+  >
+  <div className="order-history__shell">
+   <div className="order-history__stats">
+    <article className="order-history__stat-card">
+    <span className="label">Total Orders</span>
+    <strong>{sortedOrders.length}</strong>
+    </article>
+    <article className="order-history__stat-card order-history__stat-card--success">
+    <span className="label">Delivered</span>
+    <strong>
+     <FaCheckCircle /> {deliveredCount}
+    </strong>
+    </article>
+    <article className="order-history__stat-card order-history__stat-card--accent">
+    <span className="label">Earned Points</span>
+    <strong>
+     <FaGift /> {totalEarnedPoints}
+    </strong>
+    </article>
+   </div>
+
+    <div className="order-history__list">
+    {sortedOrders.map((order, index) => {
+      const product = Array.isArray(order?.items) ? order.items[0] : null;
+      const image = product?.images?.[0] || "https://via.placeholder.com/100";
+      const name = product?.item_name || product?.name || "Product";
+    const statusMeta = getStatusMeta(order?.order_status);
+      const date = order?.created_at
+       ? new Date(order.created_at).toLocaleDateString("en-IN", {
+         day: "numeric",
+         month: "short",
+         year: "numeric",
+       })
+       : "-";
+
+      return (
+      <article key={order?.order_id || `${name}-${date}-${index}`} className="oh-card">
+        <header className="oh-card__header">
+         <div className="oh-card__meta">
+          <p className="oh-card__order-id" style={{ color: titleColor }}>Order #{order?.order_id || "-"}</p>
+          <p className="oh-card__date" style={{ color: subTitleColor }}>Placed on {date}</p>
+         </div>
+         <span className={`oh-card__status oh-card__status--${statusMeta.tone}`}>{statusMeta.label}</span>
+        </header>
+
+        <div className="oh-card__row">
+         <div className="oh-card__media">
+          <img src={image} alt={name} />
+         </div>
+
+         <div className="oh-card__info">
+          <h3 style={{ color: titleColor }}>{name}</h3>
+          {product?.variant_name && <p style={{ color: subTitleColor }}>{product.variant_name}</p>}
+
+          <div className="oh-card__metrics">
+           <p style={{ color: subTitleColor }}>
+            <FaGift /> Points {order?.earned_points || 0}
+           </p>
+           <p style={{ color: subTitleColor }}>
+            <FaTruck /> Discount {order?.discount || 0}
+           </p>
+           <p className="oh-card__amount" style={{ color: titleColor }}>₹{order?.amount || 0}</p>
+          </div>
+         </div>
+        </div>
+
+        {renderProgress(order?.order_status)}
+       </article>
+      );
+     })}
+    </div>
+   </div>
+  </div>
+ );
 }
 
 export default OrderHistory;

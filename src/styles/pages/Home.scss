@@ -3,7 +3,6 @@
  // padding: 22px 22px 56px;
  color: var(--home-section-text, #1e293b);
  overflow-x: hidden;
- padding-top: 79px;
 }
 
 .home__greeting,
@@ -1559,7 +1558,6 @@
  .home__cms-banner {
  .home__cms-banner-image {
  height: clamp(200px, 56vw, 320px);
- margin-top: 55px;
  object-fit: fill;
  }
  }
@@ -1939,11 +1937,11 @@
 
 @keyframes new-arrivals-left-to-right {
  from {
- transform: translateX(-50%);
+ transform: translateX(0);
  }
 
  to {
- transform: translateX(0);
+ transform: translateX(-50%);
  }
 }
 

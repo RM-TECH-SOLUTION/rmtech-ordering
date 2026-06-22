@@ -1,7 +1,7 @@
 .pdp {
   min-height: calc(100vh - 70px);
   margin: 0 auto;
-  padding: 110px 20px 52px;
+  padding: 20px 20px 52px;
   background: var(--pdp-bg, #050505);
   color: var(--pdp-text, #eef2f7);
 }
@@ -340,8 +340,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--pdp-surface, #d5d8de);
-  color: var(--pdp-text, #0f172a);
+  background: var(--pdp-add-btn-bg, #c4c4c4);
+  color: var(--pdp-add-btn-text, #111827);
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 54px;
 
   button {
     border: 0;
@@ -530,7 +533,7 @@
 .pdp__similar-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
+  gap: 24px;
 }
 
 .pdp__similar-card {
@@ -544,6 +547,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  // margin-bottom: 16px;
 
   &:hover,
   &:focus-visible {
@@ -727,7 +731,7 @@
 
 @media (max-width: 920px) {
   .pdp {
-    padding-top: 100px;
+    // padding-top: 100px;
   }
 
   .pdp__layout {
@@ -758,7 +762,7 @@
 
 @media (max-width: 640px) {
   .pdp {
-    padding: 88px 10px 40px;
+    padding: 15px 10px 40px;
   }
 
   .pdp__breadcrumbs {
@@ -767,6 +771,13 @@
 
   .pdp__gallery {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pdp__main-image {
+    aspect-ratio: 3 / 4;
+    width: 100%;
+    order: 1;
   }
 
   .pdp__thumbs-rail {
@@ -775,12 +786,16 @@
     max-height: unset;
     overflow-x: auto;
     overflow-y: hidden;
+    gap: 8px;
+    padding-bottom: 4px;
   }
 
   .pdp__thumb {
-    min-width: 82px;
+    min-width: 68px;
+    max-width: 68px;
     height: auto;
     aspect-ratio: 3 / 4;
+    flex-shrink: 0;
   }
 
   .pdp__details h1 {
@@ -854,6 +869,6 @@
 
   .pdp__similar-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 24px;
   }
 }

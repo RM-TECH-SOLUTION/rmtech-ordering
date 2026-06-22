@@ -187,7 +187,7 @@ function Login() {
         </form>
 
         <div className="login-footer">
-          <p>
+          <p style={{ color: cardsTextColor }}>
             Don&apos;t have an account? <button type="button" className="link-btn" onClick={() => navigate("/register")}>Register</button>
           </p>
         </div>

@@ -18,6 +18,8 @@ import Address from "./pages/Address";
 
 import Checkout from "./pages/Checkout";
 
+import "./styles/app.scss";
+
 import "./styles/pages/Home.scss"
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -38,7 +40,7 @@ import { getMainCatalogues } from "./redux/mainCatalogues/mainCatalogues.reducer
 
 import { addToCart, getCart, removeFromCart } from "./redux/cart/cart.reducer";
 
-import { homePageData, getCatalogBannerData, getHomeBannerData, getNewArrivals } from "./redux/Home/home.reducer";
+import { homePageData, getCatalogBannerData, getHomeBannerData, getNewArrivals, getMerchantData } from "./redux/Home/home.reducer";
 
 import "./styles/pages/Categories.scss";
 
@@ -100,6 +102,8 @@ import {
 const normalizeToArray = (value) => (Array.isArray(value) ? value : value ? [value] : []);
 
 const APP_DOWNLOAD_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c";
+
+const HOME_SECTION_ITEM_LIMIT = 4;
 
 const RESTORE_STORAGE_KEY = "rmtech_restore_target";
 
@@ -935,7 +939,13 @@ function Home() {
   };
 
 
-  const quickActions = useMemo(() => normalizeToArray(homeCtaCards), [homeCtaCards]);
+  const quickActions = useMemo(
+
+    () => normalizeToArray(homeCtaCards).slice(0, HOME_SECTION_ITEM_LIMIT),
+
+    [homeCtaCards]
+
+  );
 
   const marqueeQuickActions = useMemo(() => {
 
@@ -950,7 +960,13 @@ function Home() {
 
   }, [quickActions]);
 
-  const displayedNewArrivals = useMemo(() => normalizeToArray(newArrivals), [newArrivals]);
+  const displayedNewArrivals = useMemo(
+
+    () => normalizeToArray(newArrivals),
+
+    [newArrivals]
+
+  );
 
   const marqueeNewArrivals = useMemo(() => {
 
@@ -966,7 +982,13 @@ function Home() {
   }, [displayedNewArrivals]);
 
 
-  const offers = useMemo(() => normalizeToArray(homeSectionOffers), [homeSectionOffers]);
+  const offers = useMemo(
+
+    () => normalizeToArray(homeSectionOffers).slice(0, HOME_SECTION_ITEM_LIMIT),
+
+    [homeSectionOffers]
+
+  );
 
 
   const socialPages = useMemo(() => {
@@ -1054,7 +1076,7 @@ function Home() {
     });
 
 
-    return mapped;
+    return mapped.slice(0, HOME_SECTION_ITEM_LIMIT);
 
   }, [socialPagesData]);
 
@@ -1066,12 +1088,12 @@ function Home() {
 
     if (cmsExploreCategories.length > 0) {
 
-      return cmsExploreCategories;
+      return cmsExploreCategories.slice(0, HOME_SECTION_ITEM_LIMIT);
 
     }
 
 
-    return catalogueModels.slice(0, 8).map((model) => ({
+    return catalogueModels.slice(0, HOME_SECTION_ITEM_LIMIT).map((model) => ({
 
       id: model.id,
 
@@ -2245,65 +2267,61 @@ function Home() {
 
             <div className="app-download__actions">
 
-              <button
+              {playStoreAppLink && (
 
-                type="button"
+                <button
 
-                className="app-download__btn app-download__btn--primary"
+                  type="button"
 
-                style={{ background: downloadPrimaryButtonBg, color: downloadPrimaryButtonText }}
+                  className="app-download__btn app-download__btn--primary"
 
-                onClick={() => {
+                  style={{ background: downloadPrimaryButtonBg, color: downloadPrimaryButtonText }}
 
-                  if (playStoreAppLink) {
+                  onClick={() => {
 
                     window.open(playStoreAppLink, "_blank", "noopener,noreferrer");
 
-                  }
+                  }}
 
-                }}
+                >
 
-                disabled={!playStoreAppLink}
+                  Download on Play Store
 
-              >
+                </button>
 
-                Get it on Play Store
+              )}
 
-              </button>
+              {appStoreAppLink && (
 
-              <button
+                <button
 
-                type="button"
+                  type="button"
 
-                className="app-download__btn app-download__btn--secondary"
+                  className="app-download__btn app-download__btn--secondary"
 
-                style={{
+                  style={{
 
-                  background: downloadSecondaryButtonBg,
+                    background: downloadSecondaryButtonBg,
 
-                  color: downloadSecondaryButtonText,
+                    color: downloadSecondaryButtonText,
 
-                  borderColor: downloadSecondaryButtonBorder,
+                    borderColor: downloadSecondaryButtonBorder,
 
-                }}
+                  }}
 
-                onClick={() => {
-
-                  if (appStoreAppLink) {
+                  onClick={() => {
 
                     window.open(appStoreAppLink, "_blank", "noopener,noreferrer");
 
-                  }
+                  }}
 
-                }}
+                >
 
-                disabled={!appStoreAppLink}
+                  Download on App Store
 
-              >
+                </button>
 
-                Download on App Store
-
-              </button>
+              )}
 
             </div>
 
@@ -2526,6 +2544,26 @@ function Categories() {
   const catalogActiveHoverShadow = getRgbaFromHex(activeBackgroundColor, 0.24, "rgba(245, 135, 42, 0.24)");
 
   const catalogActiveHoverGlow = getRgbaFromHex(activeBackgroundColor, 0.2, "rgba(245, 135, 42, 0.2)");
+
+  const catalogPrimaryButtonBg =
+
+    themeColors?.primaryButtonBackgroundColor ||
+
+    themeColors?.["Primary Button Background Color"] ||
+
+    activeBackgroundColor;
+
+  const catalogPrimaryButtonText = getReadableTextColor(catalogPrimaryButtonBg, "#111827", "#ffffff");
+
+  const catalogSecondaryButtonBg =
+
+    themeColors?.secondaryButtonBackgroundColor ||
+
+    themeColors?.["Secondary Button Background Color"] ||
+
+    "#f5872a";
+
+  const catalogSecondaryButtonText = getReadableTextColor(catalogSecondaryButtonBg, "#111827", "#ffffff");
 
   const catalogBanner = useSelector((state) => state.homeReducer?.catalogBanner || []);
 
@@ -3105,6 +3143,10 @@ function Categories() {
 
         "--cat-active-hover-glow": catalogActiveHoverGlow,
 
+        "--cat-floating-cart-btn-bg": catalogSecondaryButtonBg,
+
+        "--cat-floating-cart-btn-text": catalogSecondaryButtonText,
+
       }}
 
     >
@@ -3315,6 +3357,22 @@ function Categories() {
 
                   const discountInfo = getCatalogItemDiscountInfo(item);
 
+                  const displayPrice = getCatalogItemDisplayPrice(item);
+
+                  const comparePrice = discountInfo?.comparePrice;
+
+                  const hasVariantStock = Array.isArray(item?.variants) && item.variants.length > 0;
+
+                  const isOutOfStock = hasVariantStock
+
+                    ? item.variants.every((variant) => Number(variant?.stock || 0) <= 0)
+
+                    : item?.stock !== undefined && item?.stock !== null && item?.stock !== ""
+
+                      ? Number(item.stock) <= 0
+
+                      : false;
+
                   const image = item.images?.[0] || item.image || "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38";
 
                   const itemToken = makeRestoreToken(selectedModelId, item.id, index);
@@ -3330,6 +3388,12 @@ function Categories() {
                   const catalogCardBorderColor =
 
                     catalogCardTextColor === "#ffffff" ? "rgba(255, 255, 255, 0.2)" : "rgba(15, 23, 42, 0.14)";
+
+                  const catalogButtonBackground = catalogPrimaryButtonBg;
+
+                  const catalogButtonTextColor = catalogPrimaryButtonText;
+
+                  const catalogButtonBorderColor = catalogPrimaryButtonBg;
 
                   return (
 
@@ -3352,6 +3416,12 @@ function Categories() {
                         "--cat-item-card-muted": catalogCardMutedColor,
 
                         "--cat-item-card-border": catalogCardBorderColor,
+
+                        "--cat-item-btn-bg": catalogButtonBackground,
+
+                        "--cat-item-btn-text": catalogButtonTextColor,
+
+                        "--cat-item-btn-border": catalogButtonBorderColor,
 
                       }}
 
@@ -3407,6 +3477,14 @@ function Categories() {
 
                         <img src={image} alt={item.name} />
 
+                        <span className="cat-item-card__img-gradient" aria-hidden="true" />
+
+                        {qty > 0 && (
+
+                          <span className="cat-item-card__chip">In Cart: {qty}</span>
+
+                        )}
+
                         {discountInfo && (
 
                           <span className="cat-item-card__discount">{discountInfo.discountPercent}% OFF</span>
@@ -3417,7 +3495,17 @@ function Categories() {
 
                       <div className="cat-item-card__body">
 
-                        <p className="cat-item-card__name">{item.name}</p>
+                        <div className="cat-item-card__meta-row">
+
+                          <p className="cat-item-card__name">{item.name}</p>
+
+                          <span className={`cat-item-card__stock${isOutOfStock ? " is-out" : ""}`}>
+
+                            {isOutOfStock ? "Out of stock" : "Ready"}
+
+                          </span>
+
+                        </div>
 
                         {item.description && (
 
@@ -3427,7 +3515,27 @@ function Categories() {
 
                         <div className="cat-item-card__footer">
 
-                          <span className="cat-item-card__price">₹{getCatalogItemDisplayPrice(item)}</span>
+                          <div className="cat-item-card__price-block">
+
+                            <span className="cat-item-card__price">₹{displayPrice}</span>
+
+                            {comparePrice && (
+
+                              <span className="cat-item-card__price-strike">₹{comparePrice}</span>
+
+                            )}
+
+                            {discountInfo && (
+
+                              <span className="cat-item-card__discount-meta">
+
+                                Save ₹{discountInfo.discountValue}
+
+                              </span>
+
+                            )}
+
+                          </div>
 
                           {qty === 0 ? (
 
@@ -3437,55 +3545,58 @@ function Categories() {
 
                               className="cat-item-card__add"
 
+                              disabled={isOutOfStock}
+
                               style={{
 
-                                background: catalogCardBackground,
+                                background: catalogButtonBackground,
 
-                                color: catalogCardTextColor,
+                                color: catalogButtonTextColor,
 
-                                borderColor: catalogCardBorderColor,
+                                borderColor: catalogButtonBorderColor,
 
                               }}
 
                               onClick={(event) => {
 
+                                if (isOutOfStock) {
+                                  return;
+
+                                }
+
                                 event.stopPropagation();
 
-                                handleAuthAddToCart(item, () => {
+                                writeRestoreTarget({
 
-                                  writeRestoreTarget({
+                                  sourcePath: location.pathname,
 
-                                    sourcePath: location.pathname,
+                                  itemId: item.id,
 
-                                    itemId: item.id,
+                                  itemToken,
 
-                                    itemToken,
+                                  selectedMainId,
+
+                                  selectedModelId,
+
+                                });
+
+                                navigate(`/menu/${selectedModelId}/item/${item.id}`, {
+
+                                  state: {
+
+                                    fromPath: location.pathname,
+
+                                    breadcrumbMain: selectedMain?.name || "",
+
+                                    breadcrumbSub: selectedModel?.name || "",
+
+                                    scrollToItemToken: itemToken,
 
                                     selectedMainId,
 
                                     selectedModelId,
 
-                                  });
-
-                                  navigate(`/menu/${selectedModelId}/item/${item.id}`, {
-
-                                    state: {
-
-                                      fromPath: location.pathname,
-
-                                      breadcrumbMain: selectedMain?.name || "",
-
-                                      breadcrumbSub: selectedModel?.name || "",
-
-                                      scrollToItemToken: itemToken,
-
-                                      selectedMainId,
-
-                                      selectedModelId,
-
-                                    },
-
-                                  });
+                                  },
 
                                 });
 
@@ -3493,7 +3604,7 @@ function Categories() {
 
                             >
 
-                              ADD
+                              Add Item
 
                             </button>
 
@@ -3505,7 +3616,28 @@ function Categories() {
 
                               <span>{qty}</span>
 
-                              <button type="button" onClick={() => handleAuthAddToCart(item)}>+</button>
+                              <button
+
+                                type="button"
+
+                                disabled={isOutOfStock}
+
+                                onClick={() => {
+
+                                  if (isOutOfStock) {
+                                    return;
+
+                                  }
+
+                                  handleAuthAddToCart(item);
+
+                                }}
+
+                              >
+
+                                +
+
+                              </button>
 
                             </div>
 
@@ -3560,7 +3692,23 @@ function Categories() {
 
           </div>
 
-          <button type="button" className="cat-floating-cart__btn" onClick={() => navigate("/cart")}>
+          <button
+
+            type="button"
+
+            className="cat-floating-cart__btn"
+
+            style={{
+
+              background: catalogSecondaryButtonBg,
+
+              color: catalogSecondaryButtonText,
+
+            }}
+
+            onClick={() => navigate("/cart")}
+
+          >
 
             View Cart <FaArrowRight />
 
@@ -4141,7 +4289,7 @@ function Menu() {
 
                             event.stopPropagation();
 
-                            handleAuthAddToCart(item, () => openItemDetail(item.id, itemToken));
+                            openItemDetail(item.id, itemToken);
 
                           }}
 
@@ -5489,7 +5637,9 @@ function ProductDetail() {
 
                 <div className="pdp__info-body">
 
-                  <p>{product.description || product.specifications || "No description available."}</p>
+                  <div style={{ whiteSpace: "pre-wrap", lineHeight: "1.8" }}>
+                    {product.description || product.specifications || "No description available."}
+                  </div>
 
                 </div>
 
@@ -5525,9 +5675,9 @@ function ProductDetail() {
 
                     <p key={entry.title}>
 
-                      <strong>{entry.title}:</strong>{" "}
-
-                      {entry.title === "Availability" ? <><FaTruck /> {entry.value}</> : entry.value}
+                      <span style={{ whiteSpace: "pre-wrap", lineHeight: "1.8" }}>
+                        {entry.title === "Availability" ? <><FaTruck /> {entry.value}</> : entry.value}
+                      </span>
 
                     </p>
 
@@ -5795,6 +5945,7 @@ function App() {
     if (!isLoadingMerchant) {
 
       dispatch(homePageData());
+      dispatch(getMerchantData());
 
     }
 
@@ -6995,173 +7146,177 @@ function App() {
       <Header />
 
 
-      <Routes>
+      <main className="app-shell__content">
+        <div className="app-shell__route-area">
+          <Routes>
 
-        <Route
+            <Route
 
-          path="/login"
+              path="/login"
 
-          element={
+              element={
 
-            <PublicRoute>
+                <PublicRoute>
 
-              <Login />
+                  <Login />
 
-            </PublicRoute>
+                </PublicRoute>
 
-          }
+              }
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/register"
+              path="/register"
 
-          element={
+              element={
 
-            <PublicRoute>
+                <PublicRoute>
 
-              <Register />
+                  <Register />
 
-            </PublicRoute>
+                </PublicRoute>
 
-          }
+              }
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/"
+              path="/"
 
-          element={<Home />}
+              element={<Home />}
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/categories"
+              path="/categories"
 
-          element={<Categories />}
+              element={<Categories />}
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/menu/:categoryId"
+              path="/menu/:categoryId"
 
-          element={<Menu />}
+              element={<Menu />}
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/menu/:categoryId/item/:itemId"
+              path="/menu/:categoryId/item/:itemId"
 
-          element={<ProductDetail />}
+              element={<ProductDetail />}
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/cart"
+              path="/cart"
 
-          element={
+              element={
 
-            <ProtectedRoute>
+                <ProtectedRoute>
 
-              <Cart />
+                  <Cart />
 
-            </ProtectedRoute>
+                </ProtectedRoute>
 
-          }
+              }
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/checkout"
+              path="/checkout"
 
-          element={
+              element={
 
-            <ProtectedRoute>
+                <ProtectedRoute>
 
-              <Checkout />
+                  <Checkout />
 
-            </ProtectedRoute>
+                </ProtectedRoute>
 
-          }
+              }
 
-        />
+            />
 
 
-        <Route
+            <Route
 
-          path="/orders"
+              path="/orders"
 
-          element={
+              element={
 
-            <ProtectedRoute>
+                <ProtectedRoute>
 
-              <OrderHistory />
+                  <OrderHistory />
 
-            </ProtectedRoute>
+                </ProtectedRoute>
 
-          }
+              }
 
-        />
+            />
 
-        <Route
+            <Route
 
-          path="/profile"
+              path="/profile"
 
-          element={
+              element={
 
-            <ProtectedRoute>
+                <ProtectedRoute>
 
-              <Profile />
+                  <Profile />
 
-            </ProtectedRoute>
+                </ProtectedRoute>
 
-          }
+              }
 
-        />
+            />
 
-        <Route
+            <Route
 
-          path="/address"
+              path="/address"
 
-          element={
+              element={
 
-            <ProtectedRoute>
+                <ProtectedRoute>
 
-              <Address />
+                  <Address />
 
-            </ProtectedRoute>
+                </ProtectedRoute>
 
-          }
+              }
 
-        />
+            />
 
-        <Route path="/order-success" element={<OrderSuccess />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
 
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
-        <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/terms" element={<TermsOfService />} />
 
-        <Route path="/refund-policy" element={<RefundPolicy />} />
+            <Route path="/refund-policy" element={<RefundPolicy />} />
 
-        <Route path="/shipping" element={<ShippingPolicy />} />
+            <Route path="/shipping" element={<ShippingPolicy />} />
 
-        <Route path="/contact" element={<ContactUs />} />
+            <Route path="/contact" element={<ContactUs />} />
 
-      </Routes>
+          </Routes>
+        </div>
+      </main>
 
 
       {!hideFooter && <Footer />}
@@ -7174,4 +7329,6 @@ function App() {
 
 
 export default App;
+
+
 

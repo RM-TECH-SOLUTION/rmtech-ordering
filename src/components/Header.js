@@ -84,7 +84,7 @@ function Header() {
   const navLinks = [
     { path: "/",           label: "Home" },
     { path: "/categories", label: "Categories" },
-    { path: "/contact",    label: "Contact Us" },
+    { path: "/profile",    label: "Account" },
   ];
 
   return (

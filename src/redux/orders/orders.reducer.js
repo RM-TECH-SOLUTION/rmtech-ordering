@@ -17,16 +17,20 @@ const initialState = {
 
 const PLACE_ORDER = "orders/PLACE_ORDER";
 
-export const placeOrder = ({ items, address ,paymentMethod }) => (dispatch, getState) => {
+export const placeOrder = ({ items, address, paymentMethod, total, discount = 0, pointsDiscount = 0 }) => (dispatch) => {
+  const fallbackTotal = items.reduce(
+    (sum, item) => sum + Number(item.price) * item.qty,
+    0
+  );
+
   const order = {
     id: Date.now(),
     items,
-    address, 
-     paymentMethod,
-    total: items.reduce(
-      (sum, item) => sum + Number(item.price) * item.qty,
-      0
-    ),
+    address,
+    paymentMethod,
+    total: Number.isFinite(Number(total)) ? Number(total) : fallbackTotal,
+    discount,
+    pointsDiscount,
     status: paymentMethod === "COD" ? "Confirmed" : "Paid",
     date: new Date().toLocaleString()
   };

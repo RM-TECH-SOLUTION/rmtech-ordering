@@ -1,4 +1,3 @@
-
 import apiClient from "../../api/apiClient";
 
 const initialState = {
@@ -174,6 +173,21 @@ export const homeCtaCardsConfigData = () => async (dispatch, getState) => {
   } catch (error) {
      console.log(error,"homeCtaCardsConfig")
    }
+};
+
+export const getMerchantData = () => async (dispatch) => {
+  try {
+    const response = await apiClient.get(apiClient.Urls.getMerchant, apiClient.withContext({}));
+    const data = response?.data || response;
+    if (data?.keyId) {
+      dispatch({
+        type: MERCHANT_INFO,
+        merchantInfo: data,
+      });
+    }
+  } catch (error) {
+    console.log("getMerchantData error", error);
+  }
 };
 
 export const homePageData = () => async (dispatch) => {
